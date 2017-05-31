@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Cherwell Puzzle Challenge</title>
+    <script language="javascript">
+        var m_aRows = ["A", "B", "C", "D", "E", "F"];
+
+        function UpperCaseIt() {
+            document.getElementById("tRow").value = document.getElementById("tRow").value.toUpperCase();
+        }
+
+        function ValidateRowVal() {
+            var reRow = /^[A-F]/;
+            var oRow = document.getElementById("tRow");
+
+            if (!reRow.test(oRow.value)) {
+                alert("Please enter a row value between A-F.");
+                oRow.value = "";
+                oRow.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function ValidateColVal() {
+            var reCol = /^([1-9]|10|11|12)$/;  
+            var oCol = document.getElementById("tCol");
+
+            if (!reCol.test(oCol.value)) {
+                alert("Please enter a column value between 1-12.");
+                oCol.value = "";
+                oCol.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+
+        function DrawTriangle() {
+            //Validate the row value:
+            if (!ValidateRowVal()) {
+                return;
+            }
+
+            //Validate the column value:
+            if (!ValidateColVal()) {
+                return;
+            }
+
+            var nSideSize = 100;
+            var strRow = document.getElementById("tRow").value;
+            var nRow = m_aRows.indexOf(strRow) * nSideSize;
+            
+            var nColumn = document.getElementById("tCol").value;
+            var nOrgColVal = nColumn;
+            nColumn = (nColumn > 1) ? Math.round(nColumn / 2) : nColumn;
+            nColumn = (nColumn - 1) * nSideSize;
+            
+            var nFontCol = nColumn + 10;
+            var nFontRow = nRow + 80;
+           
+            if (document.getElementById("Easel").innerHTML === "") {
+                document.getElementById("Easel").innerHTML = "<canvas id='paper' width='600' height='600'></canvas>";
+            }
+
+            var oGrid = document.getElementById("paper");
+            if (oGrid.getContext) {
+                var oPencil = oGrid.getContext("2d");
+
+                oPencil.beginPath();
+                oPencil.moveTo(nColumn, nRow);
+
+                //Draw the hypontenuse:
+                oPencil.lineTo((nColumn + nSideSize), (nRow + nSideSize));
+ 
+                //Check to see if we are going to write to a 'flipped' triangle.
+                //If so, adjust the font starting position:
+                if ((nOrgColVal % 2) === 0) {
+                    oPencil.lineTo((nColumn + nSideSize), nRow);
+                    nFontCol = nColumn + 40;
+                    nFontRow = nRow + 30;
+                    
+                }
+                else {
+                    oPencil.lineTo(nColumn, (nRow + nSideSize));
+                }
+                oPencil.lineTo(nColumn, nRow);
+                oPencil.strokeStyle = "white";
+                oPencil.stroke();
+
+                //Fill in the triangle:
+                oPencil.fillStyle = "#339CFF";
+                oPencil.fill();
+
+                //Now write the row and column number:
+                oPencil.fillStyle = "white";
+                oPencil.font = "bold 28px Arial";
+                
+                oPencil.fillText((strRow + nOrgColVal), nFontCol, nFontRow);
+
+            }
+        }
+
+        function GetColumn(nV3X) {
+            var aCols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            var nV1 = (parseInt(nV3X) > 0) ? ((parseInt(nV3X) / 5)-2) : 0;
+            
+            return aCols[nV1];
+        }
+
+        function GetRow(nV1X) {
+            nV1 = (nV1X > 0) ? (nV1X / 10) : nV1X;
+            return m_aRows[nV1];
+        }
+
+        function WriteTrianglePosition(strRow, strCol) {
+
+            var nFontCol = 10;
+            var nFontRow = 80;
+
+            var oGrid = document.getElementById("triangleImage");
+            if (oGrid.getContext) {
+                var oPencil = oGrid.getContext("2d");
+
+                oPencil.beginPath();
+                oPencil.lineTo(nFontCol, nFontRow);
+                oPencil.strokeStyle = "white";
+                oPencil.stroke();
+                oPencil.fillStyle = "white";
+                oPencil.font = "bold 28px Arial";
+
+                oPencil.fillText((strRow + strCol), nFontCol, nFontRow);
+            }
+        }
+
+        function GetTrianglePosition() {
+            var oV2Y = document.getElementById("selV2Y");
+            var oV3X = document.getElementById("selV3X");
+
+            DrawTriangleImage();
+            WriteTrianglePosition(GetRow(oV2Y.value), GetColumn(oV3X.value));
+            
+        }
+
+        function SetSameAxisValue(strSelect, nOffset, oThis) {
+            var nNewCoordVal = parseInt(oThis.value);
+            
+            if (parseInt(nOffset) != 0) {
+                nNewCoordVal = nNewCoordVal + (nOffset * 10);
+            }
+            
+            document.getElementById(strSelect).value = nNewCoordVal;
+        }
+
+        function DrawTriangleImage() {
+            var oImage = document.getElementById("triangleImage");
+            if (oImage.getContext) {
+                
+                var oPen = oImage.getContext("2d");
+                oPen.clearRect(0, 0, oImage.width, oImage.height);
+
+                oPen.beginPath();
+                oPen.moveTo(0, 0);
+                oPen.lineTo(100, 100);
+                if (typeof nFlip != "undefined") {
+                    oPen.lineTo(100, 0);
+                }
+                else {
+                    oPen.lineTo(0, 100);
+                }
+                oPen.fillStyle = "#339CFF";
+                oPen.fill();
+            }
+        }
+
+        function IntializePage() {
+            DrawTriangleImage();  
+        }
+    </script>
+</head>
+<body onload="IntializePage();">
+    <br />
+    <h1>Right Triangle Layout Fun!</h1>
+    <table style="width:20%">
+        
+        <tr>
+            <td>Please enter a row letter:</td>
+            <td align="left"><input type="text" id="tRow" size="2" maxlength="1" onkeyup="UpperCaseIt();" /></td>
+        </tr><tr>
+            <td>Please enter a column number:</td>
+            <td align="left"><input type="text" id="tCol" size="2" maxlength="2" /></td>
+        </tr>
+        <tr>
+            <td align="center" colspan="2"><input type="button" value="Draw Triangle" onclick="DrawTriangle();" /></td>
+
+        </tr>
+    </table>
+    <br />
+    <div id="Easel"></div>
+    
+    <br />
+    <h1>Calculate the row and column for the triangle:</h1>
+    Please enter the vertex coordinates, e.g. Vx, Vy:
+    <table style ="width:10%">
+        <tr>
+            <td><b>V2:</b></td>
+            <td>
+                <!--<select id="selV1X" onchange="SetSameAxisValue('selV2X', 0, this); SetSameAxisValue('selV3X', 1, this);">-->
+                <select id="selV2X" onchange="SetSameAxisValue('selV1X', 0, this); SetSameAxisValue('selV3X', 1, this);">
+                    <option value="0">0</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="60">60</option>
+                </select>
+            </td>
+            <td >
+                <!--<select id="selV1Y" onchange="SetSameAxisValue('selV2Y', 1, this); SetSameAxisValue('selV3Y', 1, this);">-->
+                <select id="selV2Y" onchange="SetSameAxisValue('selV1Y', 1, this); SetSameAxisValue('selV3Y', 1, this);">
+                    <option value="0">0</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                </select>
+            </td>
+            <td colspan="5"></td>
+
+        </tr><tr>
+            <td colspan="2"></td>
+            <td colspan="2" align="right">
+                <canvas id="triangleImage" width="100" height="100"></canvas>
+            </td>
+            <td colspan="4"></td>
+        </tr><tr>
+            <td><b>V1:</b></td>
+            <td >
+                <select id="selV1X" onchange="SetSameAxisValue('selV2X', 0, this); SetSameAxisValue('selV3X', 1, this);">
+                    <option value="0">0</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="60">60</option>
+                </select>
+            </td>
+            <td>
+                <select id="selV1Y" onchange="SetSameAxisValue('selV2Y', -1, this); SetSameAxisValue('selV3Y', 0, this);">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="60">60</option>
+                </select>
+            </td>
+            <td colspan="3" align="right"><b>V3:</b></td>
+            <td align="right">
+                <select id="selV3X" onchange="SetSameAxisValue('selV2X', -1, this); SetSameAxisValue('selV1X', -1, this);">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="60">60</option>
+                </select>
+            </td>
+            <td>
+                <select id="selV3Y" onchange="SetSameAxisValue('selV2Y', -1, this); SetSameAxisValue('selV1Y', -1, this);">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="60">60</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="8"></td>
+        </tr>
+        <tr>
+            <td colspan="8" align="center">
+                <input type="button" value="Get Triangle Position" onclick="GetTrianglePosition();" />
+            </td>
+        </tr>
+    </table>
+    <br />
+    <br />
+</body>
+</html>
